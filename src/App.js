@@ -20,7 +20,7 @@ class App extends React.Component {
     this.state = {
       input: '',
       imageUrl: Main,
-      box: {},
+      boxes: [],
       route: 'signin',
       isSignedIn: false,
       user: {
@@ -44,22 +44,28 @@ class App extends React.Component {
     }
     })
   }
-
+  //.region_info.bounding_box
   calculateFaceLocation = (data) => {
-    const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding_box;
+    const clarifaiFaces = data.outputs[0].data.regions;
     const image = document.getElementById('inputImage');
     const width = Number(image.width);
     const height = Number(image.height);
-    return {
-      leftCol: clarifaiFace.left_col * width,
-      topRow: clarifaiFace.top_row * height,
-      rightCol: width - (clarifaiFace.right_col * width),
-      bottomRow: height - (clarifaiFace.bottom_row * height)
-    }
+    let boxesArray = [];
+    let box;
+    clarifaiFaces.forEach( clarifaiFace => {
+      box = {
+        leftCol: clarifaiFace.region_info.bounding_box.left_col * width,
+        topRow: clarifaiFace.region_info.bounding_box.top_row * height,
+        rightCol: width - (clarifaiFace.region_info.bounding_box.right_col * width),
+        bottomRow: height - (clarifaiFace.region_info.bounding_box.bottom_row * height)
+      };
+      boxesArray.push(box)
+    })
+    return boxesArray;
   }
 
-  displayFaceBox = (box) => {
-    this.setState({box})
+  displayFaceBox = (boxes) => {
+    this.setState({boxes})
   }
   displayProfile = () => {
     this.setState({showProfile: !this.state.showProfile})
@@ -92,19 +98,19 @@ class App extends React.Component {
     if (route === 'signin') {
       this.setState({isSignedIn: false})
     } else if (route === 'home'){
-      this.setState({isSignedIn: true, imageUrl: Main, box: {}})
+      this.setState({isSignedIn: true, imageUrl: Main, boxes: []})
     }
     this.setState({route})
   }
 
   render() {
-    const { isSignedIn, imageUrl, route, box } = this.state;
+    const { isSignedIn, imageUrl, route, boxes } = this.state;
     return (
       <div className="App">
         <Navigation onRouteChange={this.onRouteChange} isSignedIn={isSignedIn}/>
         { route === 'home' ?
           <div>
-            <FaceRecognition imageUrl={imageUrl} box={box}/>
+            <FaceRecognition imageUrl={imageUrl} boxes={boxes}/>
             <Profile displayProfile={this.displayProfile} showProfile={this.state.showProfile} name={this.state.user.name} entries={this.state.user.entries} joined={this.state.user.joined}/>
             <ImageLinkForm onInputChange={this.onInputChange} onButtonSubmit={this.onPictureSubmit}/>
           </div>
