@@ -1,0 +1,13 @@
+.footer{
+  width: 100%;
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 20px;
+}
+.footer img{
+  height: 20px;
+  width: auto;
+  margin: 0 5px; 
+}
